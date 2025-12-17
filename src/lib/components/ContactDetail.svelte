@@ -35,18 +35,72 @@
 </script>
 
 <div class="p-6 space-y-6">
+  <!-- Header with Back Button (always visible) -->
+  <div class="flex items-center gap-4">
+    <button class="btn btn-ghost btn-sm" onclick={handleClose}>
+      ← Back
+    </button>
+  </div>
+
   {#if loading}
-    <div class="flex items-center justify-center h-64">
-      <div class="text-neutral-500">Loading contact...</div>
-    </div>
-  {:else}
-    <!-- Header with Back Button -->
-    <div class="flex items-center gap-4">
-      <button class="btn btn-ghost btn-sm" onclick={handleClose}>
-        ← Back
-      </button>
+    <!-- Skeleton: Contact Info Card -->
+    <div class="card p-6">
+      <div class="flex items-start justify-between">
+        <div class="space-y-2">
+          <div class="skeleton h-6 w-48"></div>
+          <div class="skeleton h-5 w-16 rounded-full"></div>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-2">
+        <div class="flex items-center gap-2">
+          <div class="skeleton h-4 w-32"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="skeleton h-4 w-32"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="skeleton h-4 w-32"></div>
+        </div>
+      </div>
     </div>
 
+    <!-- Skeleton: Action Buttons (dimmed) -->
+    <div class="card p-4 opacity-50">
+      <h3 class="text-sm font-medium text-neutral-500 mb-3">Log Activity</h3>
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-secondary btn-sm" disabled>
+          📞 Call
+        </button>
+        <button class="btn btn-secondary btn-sm" disabled>
+          ✉️ Email
+        </button>
+        <button class="btn btn-secondary btn-sm" disabled>
+          📅 Meeting
+        </button>
+        <button class="btn btn-secondary btn-sm" disabled>
+          📝 Note
+        </button>
+      </div>
+    </div>
+
+    <!-- Skeleton: Activity Timeline -->
+    <div class="card p-4">
+      <h3 class="text-lg font-semibold text-neutral-900 mb-4">Activity History</h3>
+      <div class="space-y-4">
+        {#each [1, 2, 3, 4] as _}
+          <div class="flex gap-3">
+            <div class="skeleton h-8 w-8 rounded-full shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="skeleton h-4 w-24"></div>
+              <div class="skeleton h-3 w-full"></div>
+              <div class="skeleton h-3 w-20"></div>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {:else}
     <!-- Contact Info Card -->
     <div class="card p-6">
       <div class="flex items-start justify-between">

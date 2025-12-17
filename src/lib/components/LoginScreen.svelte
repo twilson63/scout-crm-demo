@@ -1,8 +1,12 @@
 <script lang="ts">
+	import Spinner from '$lib/components/Spinner.svelte';
+
 	let {
-		onlogin
+		onlogin,
+		loading = false
 	}: {
 		onlogin?: (data: { username: string; apiKey: string }) => void;
+		loading?: boolean;
 	} = $props();
 
 	let username = $state('');
@@ -10,7 +14,7 @@
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
-		if (username.trim() && apiKey.trim()) {
+		if (username.trim() && apiKey.trim() && !loading) {
 			onlogin?.({ username: username.trim(), apiKey: apiKey.trim() });
 		}
 	}
@@ -35,6 +39,7 @@
 					class="input"
 					placeholder="Enter your username"
 					required
+					disabled={loading}
 				/>
 			</div>
 
@@ -49,12 +54,22 @@
 					class="input"
 					placeholder="Enter your API key"
 					required
+					disabled={loading}
 				/>
 			</div>
 
-			<button type="submit" class="btn-primary w-full">
-				Sign In
+			<button type="submit" class="btn-primary w-full" disabled={loading}>
+				{#if loading}
+					<Spinner size="sm" class="mr-2" />
+					Signing in...
+				{:else}
+					Sign In
+				{/if}
 			</button>
+
+			{#if loading}
+				<p class="mt-3 text-center text-sm text-gray-500">Validating your credentials...</p>
+			{/if}
 		</form>
 	</div>
 </div>

@@ -60,3 +60,38 @@
     @apply badge bg-gray-600 text-white;
   }
 }
+
+/* Skeleton loading animation */
+.skeleton {
+  @apply bg-gray-200 rounded;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Progress bar animation */
+.progress-bar-indeterminate {
+  background: linear-gradient(90deg, transparent, theme('colors.gray.400'), transparent);
+  background-size: 200% 100%;
+  animation: progress-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .progress-bar-indeterminate,
+  .animate-spin {
+    animation: none;
+  }
+  .skeleton {
+    opacity: 0.7;
+  }
+}

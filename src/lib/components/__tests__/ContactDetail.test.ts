@@ -148,10 +148,13 @@ describe('ContactDetail', () => {
 	});
 
 	it('renders loading state when loading=true', () => {
-		render(ContactDetail, {
+		const { container } = render(ContactDetail, {
 			props: { contact: mockContact, activities: mockActivities, loading: true }
 		});
-		expect(screen.getByText('Loading contact...')).toBeInTheDocument();
+		// Should render skeleton elements instead of text
+		expect(container.querySelectorAll('.skeleton').length).toBeGreaterThan(0);
+		// Back button should still be visible and functional during loading
+		expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument();
 	});
 
 	it('does not render phone when not provided', () => {

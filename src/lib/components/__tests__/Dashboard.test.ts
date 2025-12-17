@@ -19,8 +19,9 @@ const mockDashboardData: DashboardData = {
 
 describe('Dashboard', () => {
 	it('renders loading state when loading=true', () => {
-		render(Dashboard, { props: { data: null, loading: true } });
-		expect(screen.getByText('Loading dashboard...')).toBeInTheDocument();
+		const { container } = render(Dashboard, { props: { data: null, loading: true } });
+		// Should render skeleton elements instead of text
+		expect(container.querySelectorAll('.skeleton').length).toBeGreaterThan(0);
 	});
 
 	it('renders dashboard stats when data is provided', () => {

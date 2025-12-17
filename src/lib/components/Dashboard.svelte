@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { DashboardData } from '$lib/types';
   import ActivityTimeline from './ActivityTimeline.svelte';
+  import SkeletonDashboard from '$lib/components/SkeletonDashboard.svelte';
 
   interface Props {
     data: DashboardData | null;
@@ -12,9 +13,7 @@
 
 <div class="p-6 space-y-6">
   {#if loading}
-    <div class="flex items-center justify-center h-64">
-      <div class="text-neutral-500">Loading dashboard...</div>
-    </div>
+    <SkeletonDashboard />
   {:else if data}
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

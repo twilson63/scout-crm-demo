@@ -5,11 +5,13 @@
 	let {
 		contacts,
 		selectedId = null,
+		loading = false,
 		onselect,
 		onadd
 	}: {
 		contacts: Contact[];
 		selectedId?: string | null;
+		loading?: boolean;
 		onselect?: (id: string) => void;
 		onadd?: () => void;
 	} = $props();
@@ -21,6 +23,6 @@
 	</header>
 
 	<div class="flex-1 overflow-y-auto p-4">
-		<ContactList {contacts} {selectedId} {onselect} {onadd} />
+		<ContactList {contacts} {selectedId} {loading} {onselect} {onadd} />
 	</div>
 </aside>

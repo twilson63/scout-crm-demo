@@ -10,7 +10,6 @@
 		selectedContact,
 		selectedContactDetails,
 		dashboardData, 
-		isLoading,
 		addContact,
 		clearContacts
 	} from '$lib/stores/contacts';
@@ -43,18 +42,31 @@
 	import MainContent from '$lib/components/MainContent.svelte';
 	import ContactForm from '$lib/components/ContactForm.svelte';
 	import ActivityForm from '$lib/components/ActivityForm.svelte';
+	import ProgressBar from '$lib/components/ProgressBar.svelte';
+
+	// Granular loading state tracking
+	let isLoggingIn = $state(false);
+	let isLoadingContacts = $state(false);
+	let isLoadingDashboard = $state(false);
+	let isLoadingContactDetail = $state(false);
+
+	// Derived state for any loading
+	let anyLoading = $derived(
+		isLoggingIn || isLoadingContacts || isLoadingDashboard || isLoadingContactDetail
+	);
 
 	// Load initial data when authenticated
 	async function loadInitialData() {
 		if (!$auth.isAuthenticated) return;
 		
-		$isLoading = true;
+		isLoadingContacts = true;
+		isLoadingDashboard = true;
 		
 		try {
 			// Load contacts and dashboard in parallel
 			const [contactsResult, dashboardResult] = await Promise.all([
-				listContacts($auth.apiKey),
-				getDashboard($auth.apiKey)
+				listContacts($auth.apiKey).finally(() => { isLoadingContacts = false; }),
+				getDashboard($auth.apiKey).finally(() => { isLoadingDashboard = false; })
 			]);
 			
 			if (contactsResult.success && contactsResult.data) {
@@ -68,14 +80,14 @@
 			}
 		} catch (err) {
 			setError('Failed to load data. Please try again.');
-		} finally {
-			$isLoading = false;
+			isLoadingContacts = false;
+			isLoadingDashboard = false;
 		}
 	}
 
 	// Handle login
 	async function handleLogin(data: { username: string; apiKey: string }) {
-		$isLoading = true;
+		isLoggingIn = true;
 		
 		try {
 			// Try to load contacts to validate the API key
@@ -86,7 +98,9 @@
 				$contacts = result.data || [];
 				
 				// Load dashboard data
+				isLoadingDashboard = true;
 				const dashResult = await getDashboard(data.apiKey);
+				isLoadingDashboard = false;
 				if (dashResult.success && dashResult.data) {
 					$dashboardData = dashResult.data;
 				}
@@ -97,8 +111,9 @@
 			}
 		} catch (err) {
 			setError('Failed to connect. Please try again.');
+			isLoadingDashboard = false;
 		} finally {
-			$isLoading = false;
+			isLoggingIn = false;
 		}
 	}
 
@@ -113,7 +128,7 @@
 	// Handle contact selection
 	async function handleSelectContact(contactId: string) {
 		$selectedContactId = contactId;
-		$isLoading = true;
+		isLoadingContactDetail = true;
 		
 		try {
 			const result = await getContactDetails($auth.apiKey, contactId);
@@ -129,7 +144,7 @@
 		} catch (err) {
 			setError('Failed to load contact details');
 		} finally {
-			$isLoading = false;
+			isLoadingContactDetail = false;
 		}
 	}
 
@@ -155,7 +170,9 @@
 				setSuccess('Contact created successfully!');
 				
 				// Refresh dashboard
+				isLoadingDashboard = true;
 				const dashResult = await getDashboard($auth.apiKey);
+				isLoadingDashboard = false;
 				if (dashResult.success && dashResult.data) {
 					$dashboardData = dashResult.data;
 				}
@@ -164,6 +181,7 @@
 			}
 		} catch (err) {
 			setError('Failed to create contact. Please try again.');
+			isLoadingDashboard = false;
 		}
 	}
 
@@ -178,14 +196,18 @@
 				
 				// Refresh contact details if we have one selected
 				if ($selectedContactId) {
+					isLoadingContactDetail = true;
 					const detailsResult = await getContactDetails($auth.apiKey, $selectedContactId);
+					isLoadingContactDetail = false;
 					if (detailsResult.success && detailsResult.data) {
 						$selectedContactDetails = detailsResult.data;
 					}
 				}
 				
 				// Refresh dashboard
+				isLoadingDashboard = true;
 				const dashResult = await getDashboard($auth.apiKey);
+				isLoadingDashboard = false;
 				if (dashResult.success && dashResult.data) {
 					$dashboardData = dashResult.data;
 				}
@@ -194,6 +216,8 @@
 			}
 		} catch (err) {
 			setError('Failed to log activity. Please try again.');
+			isLoadingContactDetail = false;
+			isLoadingDashboard = false;
 		}
 	}
 
@@ -210,8 +234,9 @@
 </script>
 
 {#if !$auth.isAuthenticated}
-	<LoginScreen onlogin={handleLogin} />
+	<LoginScreen onlogin={handleLogin} loading={isLoggingIn} />
 {:else}
+	<ProgressBar visible={anyLoading} />
 	<div class="flex h-screen flex-col">
 		<!-- Header -->
 		<header class="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
@@ -232,6 +257,7 @@
 			<Sidebar 
 				contacts={$contacts}
 				selectedId={$selectedContactId}
+				loading={isLoadingContacts}
 				onselect={handleSelectContact}
 				onadd={openContactForm}
 			/>
@@ -240,7 +266,7 @@
 				selectedContact={currentContact}
 				activities={currentActivities}
 				dashboardData={$dashboardData}
-				loading={$isLoading}
+				loading={anyLoading}
 				onLogActivity={handleLogActivityClick}
 				onDeselectContact={handleDeselectContact}
 			/>
