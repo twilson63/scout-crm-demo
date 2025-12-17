@@ -12,7 +12,14 @@ import { test, expect } from '@playwright/test';
 
 // Test credentials - using real API
 const TEST_USERNAME = 'testuser';
-const TEST_API_KEY = 'secret_dasqRzQIwufeM_CAowZO_awqlvhdvGO-o-xO2punV9w';
+const TEST_API_KEY = process.env.TEST_API_KEY || '';
+
+// Validate required environment variables
+test.beforeAll(() => {
+  if (!TEST_API_KEY) {
+    throw new Error('TEST_API_KEY environment variable is required for E2E tests. Run with: TEST_API_KEY=your_key npm run test:e2e');
+  }
+});
 
 // Long timeout for API calls (Scout API takes 20-30s)
 const API_TIMEOUT = 45000;
