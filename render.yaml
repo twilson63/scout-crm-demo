@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: ScoutCRM
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      # SPA fallback: rewrite all routes to index.html for client-side routing
+      - type: rewrite
+        source: /*
+        destination: /index.html
