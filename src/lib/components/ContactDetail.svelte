@@ -8,9 +8,26 @@
     loading: boolean;
     onLogActivity?: (type: ActivityType) => void;
     onClose?: () => void;
+    onRefresh?: () => void;
+    lastUpdated?: number;
   }
 
-  let { contact, activities, loading, onLogActivity, onClose }: Props = $props();
+  let { contact, activities, loading, onLogActivity, onClose, onRefresh, lastUpdated }: Props = $props();
+
+  function formatRelativeTime(timestamp: number): string {
+    const now = Date.now();
+    const diffMs = now - timestamp;
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+
+    if (diffMinutes < 1) {
+      return 'just now';
+    } else if (diffMinutes < 60) {
+      return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+    } else {
+      return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    }
+  }
 
   function getStatusBadgeClass(status: string): string {
     switch (status) {
@@ -32,14 +49,35 @@
   function handleClose() {
     onClose?.();
   }
+
+  function handleRefresh() {
+    onRefresh?.();
+  }
 </script>
 
 <div class="p-6 space-y-6">
-  <!-- Header with Back Button (always visible) -->
-  <div class="flex items-center gap-4">
-    <button class="btn btn-ghost btn-sm" onclick={handleClose}>
-      ← Back
-    </button>
+  <!-- Header with Back Button and Refresh -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <button class="btn btn-ghost btn-sm" onclick={handleClose}>
+        ← Back
+      </button>
+    </div>
+    <div class="flex items-center gap-3">
+      {#if lastUpdated}
+        <span class="text-xs text-neutral-400">
+          Last updated: {formatRelativeTime(lastUpdated)}
+        </span>
+      {/if}
+      <button
+        class="btn btn-ghost btn-sm"
+        onclick={handleRefresh}
+        disabled={loading}
+        title="Refresh"
+      >
+        ↻
+      </button>
+    </div>
   </div>
 
   {#if loading}

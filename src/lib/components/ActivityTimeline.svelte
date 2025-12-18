@@ -45,7 +45,7 @@
   </div>
 {:else}
   <div class="space-y-4">
-    {#each activities as activity (activity.id)}
+    {#each activities as activity, index (activity.id ?? `activity-${index}-${activity.timestamp}`)}
       <div class="flex gap-3 border-l-2 border-neutral-200 pl-4 py-2">
         <span class="text-lg" title={activity.type}>
           {getActivityIcon(activity.type)}

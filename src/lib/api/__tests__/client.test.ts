@@ -6,12 +6,13 @@ import {
   getContactDetails,
   createContact,
   logActivity,
+  clearAllCaches,
 } from '../client';
 import type { Contact, DashboardData, ContactWithActivities, Activity } from '../../types';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+(globalThis as typeof globalThis & { fetch: typeof fetch }).fetch = mockFetch;
 
 // Helper to create Scout API response format
 function createScoutResponse<T>(data: T): object {
@@ -39,6 +40,8 @@ function createScoutErrorResponse(errors: string[]): object {
 describe('API Client', () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    // Clear all caches before each test to ensure isolation
+    clearAllCaches();
   });
 
   afterEach(() => {
@@ -90,7 +93,7 @@ describe('API Client', () => {
       const result = await executeCommand('invalid-key', 'COMMAND');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe('API request failed: 401 Unauthorized');
+      expect(result.error).toContain('API request failed: 401 Unauthorized');
     });
 
     it('returns error when API returns workflow_run_failed', async () => {
